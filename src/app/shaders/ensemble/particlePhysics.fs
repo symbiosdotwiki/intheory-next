@@ -7,6 +7,7 @@ uniform sampler2D u_position;
 uniform sampler2D u_velocity;
 uniform int pass;
 uniform float time;
+uniform vec3 lmh;
 
 const float BASE = 255.0;
 const float scale = BASE * BASE;
@@ -299,7 +300,7 @@ void main() {
 
 		// posOut += velOut;
 		velOut *= noise(vec3(uv * 3.* (1.1 + sin(time*.11325)), time*1.113)) * .5 + .5;
-		velOut *= velMult;// * 2.;
+		velOut *= velMult * dot(vec3(1.), lmh) * 4.5;// * 2.;
 		v = (velOut + vec2(1.)) / 2.;
 
 		
@@ -314,13 +315,13 @@ void main() {
 
 		v = 2. * v - vec2(1.);
 		// v = -.3 * (1. - lenX) * x ;//+ lenX * v;
-		// v = -lenX * (x - .5) * .3 + (1.-lenX)*v;
+		v = -lenX * (x - .5) * .3 + (1.-lenX)*v;
 		x += v * maxVel / resolution;
 
 
-		// if(length(x -.5 + .1*unitCircle(n2rand().r * 22.*PI)) > .42){
-		// 	x = vec2(0.5) + .25 * unitCircle(n2rand().x*200.) + .1 * unitCircle((n2rand().y*500.));
-		// }
+		if(length(x -.5 + .1*unitCircle(n2rand().r * 22.*PI)) > .45){
+			x = vec2(0.5) + .25 * unitCircle(n2rand().x*200.) + .1 * unitCircle((n2rand().y*500.));
+		}
 
 		x = mod(x, 1.);
 

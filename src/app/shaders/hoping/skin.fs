@@ -668,8 +668,9 @@ vec3 render(vec2 q)
 
     // if(HD == 1){
     for(int i = 0; i < numFairy; i++){
-        if(HD == 0 && i > numFairy / 2) break;
-        fairy[i] = tunnelWidth * .8 * threePsuedo3dNoise(vec3(float(i)*12345., fairyTime, 0.)) + vec3(-10., 0., 0.);
+        if(HD == 1 || mod(float(i), 2.) == 0.){
+            fairy[i] = tunnelWidth * .8 * threePsuedo3dNoise(vec3(float(i+2)*12345.664, fairyTime, 0.)) + vec3(-10., 0., 0.);
+        }
     }
     // }
    

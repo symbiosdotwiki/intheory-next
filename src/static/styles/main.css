@@ -32,19 +32,24 @@ body {
   border-style: solid;
   border-color: white;
   border-width: 2px;
+  border-radius: .5vmin;
+
+  opacity: .75;
+  text-shadow: 0 0 .7vmin rgb(255, 255, 255);
 }
 
 #enterButton:hover {
   color: white;
   -webkit-text-fill-color: white;
-  background-color: black;
+  background-color: rgba(0,0,0,0);
 }
 
 #enterBtnDiv{
   position: fixed;
-  top: 60vh;
+  top: 65vh;
   left: 12.5vw;
   transform: translateY(100%);
+
 }
 
 button, .mediaToggle, #info-pop{
@@ -157,16 +162,53 @@ button, .mediaToggle, #info-pop{
   z-index: -2;
 }
 
+.introContainer {
+  overflow: hidden;
+  position: fixed;
+  /*width: 90%;
+  height: 90%;
+  left: 5%;
+  top: 5;*/
+  border-radius: 1vmin;
+  pointer-events: none;
+}
+
+.introScreen{
+  width: 100%;
+  height: 100%;
+  border-radius: 1vmin;
+}
+
+.introClose {
+    width: 1vmin;
+  height: 1vmin;
+  opacity: 0;
+  left: 50%;
+  top: 50%;
+/*    top: 59%;*/
+  transition: left .5s, top .5s .5s, opacity .25s .75s, width .5s, height .5s .5s;
+}
+
+.introOpen {
+  width: 90%;
+  height: 90%;
+  left: 5%;
+  top: 5%;
+  opacity: 1;
+  transition: left .5s .5s, top .5s, opacity .25s, height .5s, width .5s .5s;
+}
+
 .centerI {
   position: absolute;
   /*top: 50%;*/
-  left: 12.5vw;
+  left: 7.5vw;
   transform: translateY(-100%);
     /*left:  12.5vw;*/
     width: 75vw;
-    top: 50vh;
+    top: 55vh;
+    overflow: hidden;
 }
-@media (min-aspect-ratio: 5/4) {
+@media (min-aspect-ratio: 7/4) {
   .centerI {
     width: 38.5vw;
     top: 60vh;

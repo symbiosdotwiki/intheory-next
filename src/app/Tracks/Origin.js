@@ -1,58 +1,40 @@
 import React, { Component } from 'react'
 import { getCanvasMousePosition } from '@/helpers/screen'
-import { render } from 'react-dom'
+
 import * as twglr from '@/helpers/twgl'
 import WebGLSequencer from '@/Components/WebGLSequencer'
 
+import keyframes from './OriginSeq'
+
 var twgl = twglr.twgl
 
-class Feedback extends WebGLSequencer {
+class Origin extends WebGLSequencer {
 
   startBar = 34
 
   golScal = 2
 
   sequencerUniforms = {
-    CircleX: .1,
-    CircleY: .7,
+    bhX: 4,
+    bhRad: .0001,
+    bhSeparation: 0,
+    MOUSEX: .1,
+    MOUSEY: .7,
+    hueShift: 0,
+    camDist: 5,
+    starBright: 0,
+    bhTIME: 0,
+    // bhDist: 100,
   }
 
-  keyframes = {
-    '0' : [
-      {
-        name:'CircleX',
-        type:'sine',
-        range: [-.5, .5],
-        dur: 9
-      },
-      {
-        name:'CircleY',
-        type:'cosine',
-        range: [-.5, -.5],
-        dur: 9
-      },
-    ],
-    '10' : [
-      {
-        name:'CircleX',
-        type:'sine',
-        range: ['auto', 1],
-        dur: 4
-      },
-      {
-        name:'CircleY',
-        type:'cosine',
-        range: [null, -1],
-        dur: 4
-      },
-    ]
-  }
+  keyframes = keyframes
 
   programDefs = {
     'programLife' : ['default.vs', 'life.fs'],
     'programRandom' : ['default.vs', 'random.fs'],
     'programCircle' : ['default.vs', 'circle.fs'],
     'programAdd' : ['default.vs', 'add.fs'],
+    'programBlackhole' : ['default.vs', 'blackhole.fs'],
     'programDisplay' : ['default.vs', 'default.fs'],
   }
 
@@ -107,7 +89,8 @@ class Feedback extends WebGLSequencer {
     } = this.buffers
 
     let {
-      programLife, programRandom, programCircle, programDisplay, programAdd
+      programLife, programRandom, programCircle, programDisplay, 
+      programAdd, programBlackhole
     } = this.programs
 
 
@@ -140,12 +123,43 @@ class Feedback extends WebGLSequencer {
     }
     twglr.runProgram(gl, programAdd, addUniforms, bufferInfo, gol[1])
 
-    // Display
-    const displayUniforms = { 
-      u_texture: gol[1].attachments[0],
+    // // calc blackhole
+    // gl.useProgram(programBlackhole.program);
+    // twgl.setBuffersAndAttributes(gl, programBlackhole, canvasBuffer);
+    // twgl.setUniforms(programBlackhole, { 
+    //   sphereMap: gol[1].attachments[0],
+    //   resolution: [gl.canvas.width, gl.canvas.height],
+    //   TIME: audioData.curTime,
+    //   // MOUSE: [this.mousePos.x, this.mousePos.y],
+    //   iAudio: lmh,
+    //   pebbles: textures.pebbles,
+    //   HD: this.hdAA[0],
+    //   // MOUSE: [500, 1200],
+    //   // bhSize: 1*(AUDIO_HIGH*.2+.3),
+    //   bhDist: (Math.pow(AUDIO_LOW, 2)*2+.3) * Math.sin(audioData.curTime*.7)
+    // });
+    // twgl.setUniforms(programBlackhole, this.evalObj(this.sequencerUniforms))
+    // twgl.bindFramebufferInfo(gl, gl.canvas);
+    // twgl.drawBufferInfo(gl, canvasBuffer);
+
+    const bhUniforms = {
       resolution: canvasSize(),
+      sphereMap: gol[1].attachments[0],
+      TIME: audioData.curTime,
+      iAudio: lmh,
+      pebbles: textures.pebbles,
+      HD: this.hdAA[0],
+      bhDist: (Math.pow(AUDIO_LOW, 2)*2+.3) * Math.sin(audioData.curTime*.7),
+      ...seqUniEval
     }
-    twglr.runProgram(gl, programDisplay, displayUniforms, this.bufferInfo, gl.canvas)
+    this.runProgram(programBlackhole, bhUniforms, gl.canvas)
+
+    // // Display
+    // const displayUniforms = { 
+    //   u_texture: gol[1].attachments[0],
+    //   resolution: canvasSize(),
+    // }
+    // twglr.runProgram(gl, programDisplay, displayUniforms, this.bufferInfo, gl.canvas)
 
 
     // ping-pong buffers
@@ -153,4 +167,4 @@ class Feedback extends WebGLSequencer {
 
   }
 }
-export default Feedback
+export default Origin

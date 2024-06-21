@@ -5,10 +5,12 @@ uniform vec2 resolution;
 uniform sampler2D u_texture;
 const int numColors = 4;
 uniform float multiplier;
+uniform float hueShift;
 
 const float BASE = 255.0;
 const float scale = BASE * BASE;
 const float OFFSET = 0.0;
+const float PI = 3.1415926535897;
 
 
 vec3 hsv2rgb(vec3 c) {
@@ -42,10 +44,10 @@ void main () {
 	// colors[2] = hsv2rgb(.55, .75, .95);
 	// colors[3] = hsv2rgb(.25, .9, .95);
 
-	colors[0] = hsv2rgb(0., 0., 0.);
-	colors[1] = hsv2rgb(.42, .6, .75);
-	colors[2] = hsv2rgb(.95, .75, .95);
-	colors[3] = hsv2rgb(.15, .9, .95);
+	colors[0] = hsv2rgb(0. + sin(hueShift * 1. * PI) + hueShift, 0., 0.);
+	colors[1] = hsv2rgb(.42 - sin(hueShift * 2. * PI), .6, .75);
+	colors[2] = hsv2rgb(.95 + 1.5*sin(hueShift * 1. * PI) + hueShift, .75, .95);
+	colors[3] = hsv2rgb(.15 + 2.*sin(hueShift * 2. * PI), .9, .95);
 
 	float positions[numColors];
 	positions[0] = .001;

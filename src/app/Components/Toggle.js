@@ -1,14 +1,8 @@
 import React, { Component } from 'react'
-import { render } from 'react-dom'
 
 import WebGLComponent from './WebGLComponent'
 
-import * as twglr from '@/helpers/twgl'
-import { getCanvasMousePosition } from '@/helpers/screen'
-
 import '@/static/styles/mediaToggle.css'
-
-var twgl = twglr.twgl;
 
 class Toggle extends WebGLComponent {
 
@@ -26,6 +20,23 @@ class Toggle extends WebGLComponent {
     this.state = {
       toggleStatus: 'mini',
       wglLoaded: true,
+    }
+  }
+
+  // setupUser = () => {
+  //   document.body.onkeyup = (e) => {
+  //     console.log(e.key)
+  //       if(e.key == 't'){
+  //         // let newToggle = (this.state.toggleStatus=='mini' ? 'media' : 'mini')
+  //         this.toggleStatus(this.state.toggleStatus)
+  //       }
+  //   }
+  // }
+
+  handleKeyup = (e) => {
+    if(e.key == 't'){
+      // let newToggle = (this.state.toggleStatus=='mini' ? 'media' : 'mini')
+      this.toggleStatus(this.state.toggleStatus)
     }
   }
 

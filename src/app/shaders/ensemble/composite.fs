@@ -68,14 +68,22 @@ void main() {
 	vec2 uv = gl_FragCoord.xy / resolution;
 	vec2 l = extract(u_texture, uv);
 	float lh = 1. + sin(lightHue);
+
+	vec3 tf = vec3(
+		sin(lightHue * 2. * PI),
+		sin(lightHue * 2.1 * PI + .5), 
+		sin(lightHue * 2.3 * PI + 1.)
+	);
+	lh = rgb2hsv(tf).x;
+
 	//vec3 light1 = thinfilm(3.*lh, .5, .3);// 1./saturation);
-	vec3 light1 = l.x * hsv2rgb(vec3(lightHue, saturation * satMult, .85));
+	vec3 light1 = l.x * hsv2rgb(vec3(lh, saturation * satMult, .85));
 	// vec3 light2 = l.y * thinfilm(1.-l.y, lightHue, 1./saturation);
 	// light2 = vec3(0.);
-	vec3 light2 = l.y * hsv2rgb(vec3(lightHue + .5, saturation * satMult, .85));
+	vec3 light2 = l.y * hsv2rgb(vec3(lh + .5, saturation * satMult, .85));
 	vec3 rgb = texture2D(u_add, uv).rgb;
-	rgb = rgb2hsv(rgb);
-	rgb = hsv2rgb(rgb + vec3(hueShift, 0., 0.));
+	// rgb = rgb2hsv(rgb);
+	// rgb = hsv2rgb(rgb + vec3(hueShift, 0., 0.));
 	vec3 val = light1 + secondLight * light2 + rgb;
 	gl_FragColor = vec4(val, 1.);
 	// gl_FragColor = vec4(light1, 1.);

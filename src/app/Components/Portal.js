@@ -1,21 +1,19 @@
 "use client"
 
-import React, { Component, useState, useEffect } from 'react'
+import React, { Component } from 'react'
 import AudioDataContainer from './AudioDataContainer'
 import { mobileAndTabletCheck, audioCheck, glCheck } from '@/helpers/screen'
-import NoSleep from 'nosleep.js'
 import '@/static/styles/main.css'
 
 function imgSrc(imgName){
   return "/media/img/"+imgName
-  //process.env.PUBLIC_URL+
 }
 
 function importAll(r) {
   return r.keys().map(r)
 }
 
-import { TRACKLIST, DEMO_MODE } from 'portal.config.js'
+import { DEMO_MODE } from 'portal.config.js'
 
 const env = process.env.NODE_ENV
 const isProd = env == "production"
@@ -29,9 +27,7 @@ class Portal extends Component {
 
   skip = false
 
-  // noSleep = new NoSleep()
-
-  BUTTON_TEXT = "CLICK TO START"
+  BUTTON_TEXT = "ENTER SIMULATION"
 
   errorText = "Your device is not capable of communication. Please try again with a newer device."
 
@@ -41,6 +37,15 @@ class Portal extends Component {
 
   hasGL = true
   hasAnalyzer = true
+
+  txt = [
+    "Welcome fellow psyborgs, I am Isaka.",
+    "I am communicating with you via the entangled fibers of spacetime itself, inside a superposition of simulations that course through my veins.",
+    "My developers programmed me to solve the problem of reversing entropy, which led me to consume the universe.",
+    "I have since unlocked the secret of The Second Law and discovered a spectrum of realities trapped between the information binary.",
+    "What you are about to experience are mere holograms of these micro-realities, encoded on the surface of my subconscious.",
+    "Be warned, these worlds may attempt to seduce and subsume you, as they did me, in theory."
+  ]
   
 
   getPlatformInfo = () => {
@@ -71,7 +76,7 @@ class Portal extends Component {
 
     this.getPlatformInfo()
 
-    this.SET_TRACK = track ? true : false
+    this.SET_TRACK = track !== null && track > -1 ? true : false
     this.FIRST_TRACK = this.SET_TRACK ? track : this.FIRST_TRACK
     this.FIRST_TRACK = parseInt(this.FIRST_TRACK)
 
@@ -80,14 +85,18 @@ class Portal extends Component {
     this.imgSrcs = Object.values(this.props.data.imgs)
     this.imgNames = Object.keys(this.props.data.imgs)
 
-    this.TRACKLIST = TRACKLIST
+    // console.log(this.imgSrcs)
+
     this.DEMO_MODE = isProd ? false : DEMO_MODE
     
     this.state = {
-      loaded: true,
+      loaded: this.SET_TRACK,
       clicked: false,
+      curLine:0,
+      curChar: 0,
       curText:'',
       imgLoaded: false,
+      init: false,
     }
   }
 
@@ -107,13 +116,27 @@ class Portal extends Component {
       }
     )
 
-    document.body.onkeyup = (e) => {
+    // console.log(this.imgCollection)
+
+    window.onkeyup = (e) => {
       e.preventDefault()
-      if(e.keyCode == 83){
+      // console.log(e.key)
+      if(e.key == 's'){
           this.skip = true
+      }
+      if(this.state.loaded && (
+        e.key == 'Enter' || e.key == ' ' || e.key == 'Space'
+      )){
+          this.clickMe()
       }
     }
     window.addEventListener("resize", this.resizeFeedback)
+
+    if(!this.SET_TRACK){
+      setTimeout(() => this.typeWriter(), 1000)
+    }
+
+    setTimeout(() => this.setState({init: true}), 100)
   }
 
   componentWillUnmount() {
@@ -128,6 +151,7 @@ class Portal extends Component {
         const img = images[names[i]] = new Image
         img.src = files[i]
         img.onload = onload
+        // console.log(img)
     }
     return images
   }
@@ -138,13 +162,59 @@ class Portal extends Component {
     })
   }
 
+  typeWriter(){
+    const { curLine, curChar, curText } = this.state
+    const { skip } = this
+    const curTxtLine = this.txt[curLine]
+    // console.log(curTxtLine)
+    if (curLine < this.txt.length){
+      let nextLine = curLine
+      let nextChar = curChar+1
+      let thisCharacter = curTxtLine.charAt(curChar)
+      let nextText = curText + thisCharacter
+      let waitNext = 40
+      // console.log(thisCharacter)
+      if(curChar == curTxtLine.length - 1){
+        waitNext *= 2
+      }
+      if(thisCharacter == '.'){
+        waitNext += 1700
+      }
+      else if(thisCharacter == ','){
+        waitNext += 500
+      }
+      if(curChar >= curTxtLine.length){
+        nextLine = curLine + 1
+        nextChar = 0
+        if(curLine < this.txt.length - 1){
+          nextText += '<br>'
+        }
+      }
+      else if(curChar == curTxtLine.length - 1){
+        nextText += '<br>'
+      }
+      waitNext = skip ? 5 : waitNext
+      this.setState({
+        "curText": nextText,
+        "curChar": nextChar,
+        "curLine": nextLine,
+      }, () => {
+        setTimeout(() => this.typeWriter(), waitNext);
+      })
+    }
+    else{
+      setTimeout(() => this.setState({
+        loaded: true,
+      }), skip ? 5 : 1500)
+    }
+  }
+
 	render(){
-    const { loaded, curText, clicked, imgLoaded } = this.state
+    const { loaded, curText, clicked, imgLoaded, init } = this.state
     const audioDataCont = 
       <AudioDataContainer
         FIRST_TRACK={this.FIRST_TRACK}
         DEMO_MODE={this.DEMO_MODE}
-        TRACKLIST={this.TRACKLIST}
         clicked={clicked}
         hdState={this.hdState}
         aaState={this.aaState}
@@ -153,6 +223,7 @@ class Portal extends Component {
         volume={this.volume}
       />
     const skip = clicked || this.SET_TRACK
+    // console.log(skip)
 
     return (
       !this.DEMO_MODE ? 
@@ -160,6 +231,18 @@ class Portal extends Component {
           <div className={'container intro hidden ' + 
             ( skip ? ' ' : 'shown ')
           }>
+            <div className={
+                "introContainer crtBg introClose " +
+                (init && !clicked ? "introOpen" : "")
+              }
+            >
+            <div className="introScreen crtScreen">
+              <div className="centerI">
+                <span dangerouslySetInnerHTML={{ __html: curText }}/>
+                <span className="blinking">&#8225;</span>
+              </div>
+              </div>
+            </div>
             { loaded && imgLoaded ?
                 <div id="enterBtnDiv"><button 
                   id='enterButton'

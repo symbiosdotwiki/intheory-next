@@ -609,4 +609,4 @@ const keyframes = {
     ]
   }
 
-  export default keyframes
+export default keyframes

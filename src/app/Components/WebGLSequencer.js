@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { getCanvasMousePosition } from '@/helpers/screen'
-import { render } from 'react-dom'
+
 import * as twglr from '@/helpers/twgl'
 import {afn, minGreater, maxLessthan} from '@/helpers/animation'
 import WebGLInfo from './WebGLInfo'

@@ -1,11 +1,8 @@
 /** @type {import('next').NextConfig} */
 
+const isProd = process.env.NODE_ENV === 'production'
+
 const nextConfig = {
-  output: 'export',
-  images: {
-    unoptimized: true,
-  },
-  
   reactStrictMode: false,
   swcMinify: true,
   webpack: (config) => {
@@ -14,7 +11,15 @@ const nextConfig = {
       type: 'asset/source'
     })
     return config
-  }
+  },
+
+  distDir: 'build',
+  output: 'export',
+  assetPrefix: isProd ? '/static/' : undefined,
+  basePath: isProd ? '/static' : undefined,
+  images: {
+    unoptimized: true,
+  },
 }
 
 module.exports = nextConfig

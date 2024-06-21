@@ -1,20 +1,21 @@
+"use client"
+
 import React from 'react'
 
 import AudioControls from './AudioControls'
 import Toggle from './Toggle'
 import Loader from './Loader'
-
 import Track from './Track'
 
-import '@/static/styles/main.css'
+import { clamp }  from '@/helpers/screen'
+
+// import '@/static/styles/main.css'
 import '@/static/styles/mediaplayer.css'
 import '@/static/styles/miniplayer.css'
 
-const mp3Loc = "/media/mp3/";
-
-function clamp(number, min, max) {
-    return Math.max(min, Math.min(number, max));
-  }
+import { 
+  TRACKLIST, SINGLE_TRACK, LOOP_SINGLE_TRACK, MP3_LOC
+} from 'portal.config.js'
 
 
 class AudioDataContainer extends React.Component {
@@ -41,19 +42,21 @@ class AudioDataContainer extends React.Component {
   constructor(props) {
     super(props)    
 
-    // this.audioState = this.props.clicked ? 'playing' : 'paused'
+    this.TRACKLIST = TRACKLIST
+    // console.log(TRACKLIST)
+
     this.audioState = this.audioContext.state == 'running'
       ? 'playing' : 'paused'
 
-// console.log('volume', props.volume)
     this.audioFile.preload = 'auto'
     
     this.frequencyBandArray = [...Array(25).keys()]
-    this.audioFile.src = this.mp3Src(props.FIRST_TRACK)
+    const audioSrc = SINGLE_TRACK ? 
+      MP3_LOC + SINGLE_TRACK : this.mp3Src(props.FIRST_TRACK)
+    this.audioFile.src = audioSrc
     this.audioFile.volume = props.volume
     
     this.source.connect(this.audioContext.destination)
-    // console.log('hi')
 
     this.audioData.fftSize = 1024
     this.audioData.maxDecibels = -2
@@ -81,30 +84,34 @@ class AudioDataContainer extends React.Component {
   componentDidMount() {
     this.audioFile.addEventListener('loadedmetadata', this.audioLoaded, false)
     this.audioFile.addEventListener('ended', this.audioEnded, false)
-    document.body.onkeyup = (e) => {
-        e.preventDefault()
-        if(e.keyCode == 32){
-            this.playPauseAudio()
-        }
-        else if(e.keyCode == 72){
-            this.toggleHide()
-        }
-        else if(e.keyCode == 39){
-            this.nextAudio()
-        }
-        else if(e.keyCode == 37){
-            this.prevAudio()
-        }
-        else if(e.keyCode == 70){
-          this.toggleHD()
-        }
-    }
+    window.addEventListener('keyup', this.handleKeyup)
     addEventListener("dblclick", (event) => this.toggleHide())
     setTimeout(() => this.setState({loadVizzy: true}), 100)
   }
 
+  handleKeyup = (e) => {
+    if(this.state.audioLoaded && (
+        e.key == ' ' || e.key == 'Enter' || e.key == 'Space'
+      )){
+      this.playPauseAudio()
+    }
+    else if(e.key == 'h'){
+      this.toggleHide()
+    }
+    else if(e.key == 'ArrowRight'){
+      this.nextAudio()
+    }
+    else if(e.key == 'ArrowLeft'){
+      this.prevAudio()
+    }
+    else if(e.key == 'f'){
+      this.toggleHD()
+    }
+  }
+
   componentWillUnmount() {
     this.audioContext.close()
+    window.removeEventListener('keyup', this.handleKeyup)
   }
 
   toggleHide = () => {
@@ -112,7 +119,7 @@ class AudioDataContainer extends React.Component {
   }
 
   mp3Src = (tracknum) => {
-    return mp3Loc+this.props.TRACKLIST[tracknum].source
+    return MP3_LOC+this.TRACKLIST[tracknum].source
   }
 
   setScreenOrientation = () => {
@@ -137,12 +144,16 @@ class AudioDataContainer extends React.Component {
 
   audioEnded = () => {
     const {DEMO_MODE} = this.props
-    if(this.state.trackNum < this.props.TRACKLIST.length-1 && !DEMO_MODE){
-      this.nextAudio()
-    }
-    else if(DEMO_MODE){
+    if(DEMO_MODE){
       this.audioFile.currentTime = 0
       this.audioFile.play()
+    }
+    else if(this.state.trackNum < this.TRACKLIST.length-1){
+      if(LOOP_SINGLE_TRACK){
+        this.audioFile.currentTime = 0
+        this.audioFile.play()
+      }
+      this.nextAudio()
     }
   }
 
@@ -160,9 +171,11 @@ class AudioDataContainer extends React.Component {
 
   setAudio = (trackNum, audioState) => {
     this.trackNum = trackNum
-    this.audioFile.pause()
-    this.audioFile.src = this.mp3Src(trackNum);
-    this.audioFile.load()
+    if(!SINGLE_TRACK){
+      this.audioFile.pause()
+      this.audioFile.src = this.mp3Src(trackNum);
+      this.audioFile.load()
+    }
     let url = '/' + (trackNum + 1)
     window.history.replaceState({ ...window.history.state, as: url, url: url }, '', url);
   }
@@ -197,10 +210,11 @@ class AudioDataContainer extends React.Component {
 
   nextAudio = (audioState) => {
     const {DEMO_MODE} = this.props
-    if(this.state.trackNum < this.props.TRACKLIST.length-1 && !DEMO_MODE){
+    if(this.state.trackNum < this.TRACKLIST.length-1 && !DEMO_MODE){
+      const nextALState = SINGLE_TRACK ? this.state.audioLoaded : false
       this.setState({
         trackNum:this.state.trackNum + 1,
-        audioLoaded:false,
+        audioLoaded: nextALState,
         loadVizzy: false,
       }, () => {
         this.setAudio(this.state.trackNum, audioState)
@@ -212,9 +226,10 @@ class AudioDataContainer extends React.Component {
   prevAudio = (audioState) => {
     const {DEMO_MODE} = this.props
     if(this.state.trackNum > 0 && !DEMO_MODE){
+      const nextALState = SINGLE_TRACK ? this.state.audioLoaded : false
       this.setState({
         trackNum:this.state.trackNum - 1,
-        audioLoaded:false,
+        audioLoaded: nextALState,
         loadVizzy: false,
       }, () => {
         this.setAudio(this.state.trackNum, audioState)
@@ -333,12 +348,12 @@ class AudioDataContainer extends React.Component {
     return {
       "playState" : this.audioState,
       "curTime" : this.audioFile.currentTime,
-      "bpm" : this.props.TRACKLIST[this.state.trackNum].bpm
+      "bpm" : this.TRACKLIST[this.state.trackNum].bpm
     }
   }
 
   visualizer = (trackNum) => {
-    const components = this.props.TRACKLIST.map(r => r.component)
+    const components = this.TRACKLIST.map(r => r.component)
     const compNum = Math.max(0, Math.min(components.length, trackNum))
     return <Track 
       trackNum={trackNum}
@@ -356,17 +371,18 @@ class AudioDataContainer extends React.Component {
 
   audioController = (type) => {
     return <AudioControls
-      maxTrack={this.props.TRACKLIST.length-1}
+      maxTrack={this.TRACKLIST.length-1}
       trackNum={this.state.trackNum}
       prevAudio={this.prevAudio}
       nextAudio={this.nextAudio}
       playAudio={this.playAudio}
       pauseAudio={this.pauseAudio}
-      TRACKLIST={this.props.TRACKLIST}
+      TRACKLIST={this.TRACKLIST}
       audioLoaded={this.state.audioLoaded}
       getAudioState={this.getAudioState}
       getHDAA={this.getHDAA}
       toggleHD={this.toggleHD}
+      toggleAA={this.toggleAA}
       type={type}
       tex={this.props.tex}
       shaders={this.props.shaders}
@@ -375,11 +391,12 @@ class AudioDataContainer extends React.Component {
   }
 
   render(){
+    const { TRACKLIST } = this
     const { 
       trackNum, audioLoaded, webglLoaded, clicked, audioLoadedOnce,
       toggle, hide, loadVizzy
     } = this.state
-    const { TRACKLIST, DEMO_MODE, tex, shaders } = this.props
+    const { DEMO_MODE, tex, shaders } = this.props
     const miniController = this.audioController('mini')
     const mediaController = this.audioController('media')
     return (

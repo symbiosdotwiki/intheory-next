@@ -4,8 +4,8 @@ const filesContext = require.context('@/Tracks', false, /\.js$/)
 
 const modules = filesContext.keys().reduce((modules, modulePath) => {
   const moduleName = modulePath.replace(/^.+\/([^/]+)\.js/, '$1')
-  const mod = filesContext(modulePath).default
-  modules[moduleName] = mod
+  const moduleDef = filesContext(modulePath).default
+  modules[moduleName] = moduleDef
   return modules;
 }, {})
 
