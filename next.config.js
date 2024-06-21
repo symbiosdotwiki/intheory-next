@@ -15,8 +15,8 @@ const nextConfig = {
 
   distDir: 'build',
   output: 'export',
-  assetPrefix: isProd ? '/static/' : undefined,
-  basePath: isProd ? '/static' : undefined,
+  // assetPrefix: isProd ? '/static/' : undefined,
+  // basePath: isProd ? '/static' : undefined,
 }
 
 module.exports = nextConfig
