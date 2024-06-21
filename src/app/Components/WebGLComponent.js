@@ -10,7 +10,7 @@ class WebGLComponent extends Component {
   hdAA = [false, false]
   hdSize = 1
   nonHDSize = .5
-  pixRat = 1;//window.devicePixelRatio || 1
+  pixRat = window.devicePixelRatio || 1
 
   mousePos = {x: 0, y: 0}
 
