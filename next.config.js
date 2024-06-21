@@ -17,9 +17,6 @@ const nextConfig = {
   output: 'export',
   assetPrefix: isProd ? '/static/' : undefined,
   basePath: isProd ? '/static' : undefined,
-  images: {
-    unoptimized: true,
-  },
 }
 
 module.exports = nextConfig
